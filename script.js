@@ -1,24 +1,112 @@
-let medicineData = [...medicines];
+const ADMIN_PASSWORD = "BilalAnsariNaziyaSalmani";
+
+let medicineData = JSON.parse(localStorage.getItem("wellness_medicines")) || [...medicines];
 
 let cart = [];
-
 let editId = null;
+let isAdmin = false;
+let selectedImage = "";
 
-
-
-window.onload = function(){
+window.onload = () => {
 
 renderMedicines(medicineData);
 
+const img = document.getElementById("imageFile");
+
+if(img){
+
+img.addEventListener("change",function(){
+
+const file=this.files[0];
+
+if(!file){
+
+selectedImage="";
+
+return;
+
+}
+
+const reader=new FileReader();
+
+reader.onload=function(e){
+
+selectedImage=e.target.result;
+
 };
 
+reader.readAsDataURL(file);
 
+});
 
+}
+
+};
+
+function saveLocal(){
+
+localStorage.setItem(
+
+"wellness_medicines",
+
+JSON.stringify(medicineData)
+
+);
+
+}
+
+function adminLogin(){
+
+if(isAdmin){
+
+document.getElementById("adminPanel").style.display="block";
+
+return;
+
+}
+
+let pass=prompt("Enter Admin Password");
+
+if(pass===ADMIN_PASSWORD){
+
+isAdmin=true;
+
+alert("Welcome Admin");
+
+document.getElementById("adminPanel").style.display="block";
+
+renderMedicines(medicineData);
+
+}
+
+else{
+
+alert("Wrong Password");
+
+}
+
+}
+
+function searchMedicine(){
+
+let value=document.getElementById("search").value.toLowerCase();
+
+let result=medicineData.filter(m=>
+
+m.brand.toLowerCase().includes(value)||
+
+m.salt.toLowerCase().includes(value)||
+
+m.company.toLowerCase().includes(value)
+
+);
+
+renderMedicines(result);
+
+}
 function renderMedicines(list){
 
-let container =
-document.getElementById("medicineContainer");
-
+let container=document.getElementById("medicineContainer");
 
 container.innerHTML="";
 
@@ -28,11 +116,10 @@ list.forEach(m=>{
 
 container.innerHTML += `
 
-
 <div class="card">
 
 
-<img src="${m.image}" class="medicineImage">
+<img src="${m.image || 'medicine.png'}" class="medicineImage">
 
 
 <h2>${m.brand}</h2>
@@ -48,10 +135,9 @@ container.innerHTML += `
 
 <p><b>MRP:</b> ₹${m.mrp}</p>
 
-<p><b>Manufacturing:</b> ${m.mfg}</p>
+<p><b>MFG:</b> ${m.mfg}</p>
 
 <p><b>Expiry:</b> ${m.expiry}</p>
-
 
 
 <button 
@@ -63,30 +149,29 @@ onclick="addToCart(${m.id})">
 </button>
 
 
+${isAdmin ? `
 
 <button class="editBtn"
 onclick="editMedicine(${m.id})">
 
-Edit
+✏️ Edit
 
 </button>
-
 
 
 <button class="deleteBtn"
 onclick="deleteMedicine(${m.id})">
 
-Delete
+🗑️ Delete
 
 </button>
 
+` : ""}
 
 
 </div>
 
-
 `;
-
 
 });
 
@@ -95,50 +180,9 @@ Delete
 
 
 
-
-
-function searchMedicine(){
-
-
-let value =
-document.getElementById("search")
-.value
-.toLowerCase();
-
-
-
-let result =
-medicineData.filter(m=>
-
-
-m.brand.toLowerCase().includes(value) ||
-
-m.salt.toLowerCase().includes(value) ||
-
-m.company.toLowerCase().includes(value)
-
-
-);
-
-
-
-renderMedicines(result);
-
-
-}
-
-
-
-
-
-
-
 function addToCart(id){
 
-
-let m =
-medicineData.find(x=>x.id===id);
-
+let m=medicineData.find(x=>x.id===id);
 
 
 cart.push({
@@ -148,160 +192,70 @@ name:m.brand
 });
 
 
-
 sendWhatsApp();
 
-
 }
-
-
-
-
 
 
 
 function sendWhatsApp(){
 
-
-
-let message =
-"Hello Wellness Medicare\n\nMy Order:\n\n";
-
+let message="Hello Wellness Medicare\n\nMy Order:\n\n";
 
 
 cart.forEach(item=>{
 
-
-message +=
-
-item.name+
-"\n";
-
+message += item.name+"\n";
 
 });
-
 
 
 let number="916396832385";
 
 
-
-let url =
-"https://wa.me/"+number+
-"?text="+
-encodeURIComponent(message);
+let url="https://wa.me/"+number+"?text="+encodeURIComponent(message);
 
 
-
-window.location.href = url;
-
+window.location.href=url;
 
 
 cart=[];
 
-
-
 }
-
-
-
-
-
-
-
-
-
-function toggleAdmin(){
-
-
-let panel =
-document.getElementById("adminPanel");
-
-
-
-if(panel.style.display==="none" ||
-panel.style.display===""){
-
-
-panel.style.display="block";
-
-
-}
-
-else{
-
-
-panel.style.display="none";
-
-
-clearForm();
-
-
-}
-
-
-}
-
-
-
-
-
-
-
 function saveMedicine(){
+
+if(!isAdmin){
+
+alert("Admin Login Required");
+
+return;
+
+}
 
 
 let medicine={
 
 
-brand:
-document.getElementById("brand").value,
+brand:document.getElementById("brand").value,
+
+salt:document.getElementById("salt").value,
+
+company:document.getElementById("company").value,
+
+mg:document.getElementById("mg").value,
+
+packing:document.getElementById("packing").value,
+
+mfg:document.getElementById("mfg").value,
+
+expiry:document.getElementById("expiry").value,
+
+mrp:document.getElementById("mrp").value,
 
 
-salt:
-document.getElementById("salt").value,
-
-
-company:
-document.getElementById("company").value,
-
-
-mg:
-document.getElementById("mg").value,
-
-
-packing:
-document.getElementById("packing").value,
-
-
-mfg:
-document.getElementById("mfg").value,
-
-
-expiry:
-document.getElementById("expiry").value,
-
-
-mrp:
-document.getElementById("mrp").value,
-
-
-stripPrice:
-document.getElementById("mrp").value,
-
-
-boxPrice:
-document.getElementById("mrp").value,
-
-
-quantity:0,
-
-
-image:"medicine.png"
-
+image:selectedImage || "medicine.png"
 
 };
-
 
 
 
@@ -310,19 +264,15 @@ if(editId===null){
 
 medicine.id=Date.now();
 
-
 medicineData.push(medicine);
 
 
 }
 
-
 else{
 
 
-let old =
-medicineData.find(x=>x.id===editId);
-
+let old=medicineData.find(x=>x.id===editId);
 
 
 Object.assign(old,medicine);
@@ -335,17 +285,13 @@ editId=null;
 
 
 
-renderMedicines(medicineData);
-
-
 saveLocal();
 
 
+renderMedicines(medicineData);
+
+
 clearForm();
-
-
-document.getElementById("adminPanel")
-.style.display="none";
 
 
 alert("Medicine Saved");
@@ -357,23 +303,23 @@ alert("Medicine Saved");
 
 
 
-
-
 function editMedicine(id){
 
 
-let m =
-medicineData.find(x=>x.id===id);
+if(!isAdmin){
 
+return;
+
+}
+
+
+let m=medicineData.find(x=>x.id===id);
 
 
 editId=id;
 
 
-
-document.getElementById("adminPanel")
-.style.display="block";
-
+document.getElementById("adminPanel").style.display="block";
 
 
 document.getElementById("brand").value=m.brand;
@@ -393,38 +339,45 @@ document.getElementById("expiry").value=m.expiry;
 document.getElementById("mrp").value=m.mrp;
 
 
+selectedImage=m.image;
+
+
+}
+function deleteMedicine(id){
+
+
+if(!isAdmin){
+
+alert("Admin Login Required");
+
+return;
 
 }
 
 
 
+let confirmDelete=confirm("Delete Medicine?");
 
 
+if(confirmDelete){
 
 
-function deleteMedicine(id){
-
-
-if(confirm("Delete Medicine?")){
-
-
-medicineData =
-medicineData.filter(x=>x.id!==id);
-
-
-
-renderMedicines(medicineData);
+medicineData=medicineData.filter(x=>x.id!==id);
 
 
 saveLocal();
 
 
-}
+renderMedicines(medicineData);
+
+
+alert("Medicine Deleted");
 
 
 }
 
 
+}
 
 
 
@@ -434,54 +387,22 @@ function clearForm(){
 
 
 document.querySelectorAll("#adminPanel input")
-.forEach(x=>x.value="");
+
+.forEach(input=>{
 
 
+input.value="";
+
+
+});
+
+
+selectedImage="";
 
 editId=null;
 
 
 }
-
-
-
-
-
-
-
-function saveLocal(){
-
-
-localStorage.setItem(
-
-"wellness_medicines",
-
-JSON.stringify(medicineData)
-
-);
-
-
-}
-
-
-
-
-
-
-let savedData =
-localStorage.getItem("wellness_medicines");
-
-
-
-if(savedData){
-
-
-medicineData =
-JSON.parse(savedData);
-
-
-}
-
 
 
 
@@ -507,17 +428,13 @@ behavior:"smooth"
 
 
 
-
 window.addEventListener("scroll",()=>{
 
 
-let btn =
-document.getElementById("topBtn");
-
+let btn=document.getElementById("topBtn");
 
 
 if(!btn)return;
-
 
 
 if(window.scrollY>300){
@@ -544,13 +461,10 @@ btn.style.display="none";
 
 
 
-
 window.onclick=function(e){
 
 
-let popup =
-document.getElementById("popup");
-
+let popup=document.getElementById("popup");
 
 
 if(e.target===popup){
@@ -569,17 +483,49 @@ popup.style.display="none";
 
 
 
-
-window.addEventListener(
-
-"beforeunload",
-
-()=>{
+function closePopup(){
 
 
-saveLocal();
+document.getElementById("popup").style.display="none";
 
 
 }
+window.addEventListener("beforeunload",()=>{
 
-);
+saveLocal();
+
+});
+
+
+
+function resetAdmin(){
+
+isAdmin=false;
+
+document.getElementById("adminPanel").style.display="none";
+
+clearForm();
+
+}
+
+
+
+function logoutAdmin(){
+
+resetAdmin();
+
+alert("Admin Logged Out");
+
+}
+
+
+
+function refreshMedicines(){
+
+renderMedicines(medicineData);
+
+}
+
+
+
+refreshMedicines();
