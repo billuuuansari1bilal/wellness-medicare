@@ -1,5 +1,4 @@
 const medicines = [
-
 {
 id:1,
 brand:"Dolo 650",
@@ -15,7 +14,6 @@ mrp:"35",
 quantity:100,
 image:"medicine.png"
 },
-
 {
 id:2,
 brand:"Crocin 650",
@@ -31,7 +29,6 @@ mrp:"36",
 quantity:120,
 image:"medicine.png"
 },
-
 {
 id:3,
 brand:"Augmentin 625",
@@ -47,7 +44,6 @@ mrp:"235",
 quantity:40,
 image:"medicine.png"
 },
-
 {
 id:4,
 brand:"Aciloc 150",
@@ -63,5 +59,4 @@ mrp:"52",
 quantity:0,
 image:"medicine.png"
 }
-
 ];
