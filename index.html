@@ -1,108 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Wellness Medicare</title>
-
-<link rel="stylesheet" href="style.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wellness Medicare</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <header class="header">
-
-<h1>🏥 Wellness Medicare</h1>
-
-<p>📍 Pathanpura, Deoband</p>
-
+    <h1>🏥 Wellness Medicare</h1>
+    <p>📍 Pathanpura, Deoband</p>
 </header>
 
 <div class="container">
+    <input type="text" id="search" placeholder="Search Medicine (Name, Salt or Company)..." onkeyup="searchMedicine()">
 
-<input
-type="text"
-id="search"
-placeholder="Search Medicine..."
-onkeyup="searchMedicine()">
+    <button onclick="adminLogin()">🔐 Admin Panel</button>
 
-<button onclick="adminLogin()">
-🔐 Admin Panel
-</button>
+    <div id="adminPanel" style="display:none;">
+        <h2>Add / Edit Medicine</h2>
+        <input id="brand" placeholder="Brand Name">
+        <input id="salt" placeholder="Salt">
+        <input id="company" placeholder="Company">
+        <input id="mg" placeholder="MG">
+        <input id="packing" placeholder="Packing">
+        <input id="mfg" placeholder="MFG">
+        <input id="expiry" placeholder="Expiry">
+        <input id="mrp" placeholder="MRP">
+        <label><b>Medicine Photo</b></label>
+        <input type="file" id="imageFile" accept="image/*">
+        <button onclick="saveMedicine()">💾 Save Medicine</button>
+        <button onclick="logoutAdmin()" style="background:#666;">Logout</button>
+    </div>
 
-<div id="adminPanel" style="display:none;">
+    <div id="medicineContainer"></div>
 
-<h2>Add / Edit Medicine</h2>
+    <!-- Selection Popup for Strips/Boxes -->
+    <div id="qtyPopup" class="popup">
+        <div class="popupBox">
+            <span class="close" onclick="closeQtyPopup()">&times;</span>
+            <h3 id="popTitle">Select Quantity</h3>
+            <div class="qty-row">
+                <label>Strips:</label>
+                <input type="number" id="stripQty" value="0" min="0">
+            </div>
+            <div class="qty-row">
+                <label>Boxes:</label>
+                <input type="number" id="boxQty" value="0" min="0">
+            </div>
+            <button id="confirmAddBtn" class="editBtn">Add to Cart</button>
+        </div>
+    </div>
 
-<input id="brand" placeholder="Brand Name">
+    <!-- Fixed Bottom Cart Bar -->
+    <div id="bottomCartBar" class="cart-bar" style="display: none;">
+        <div class="cart-info">
+            <span id="cartCount">0 Items in Cart</span>
+        </div>
+        <button class="place-order-btn" onclick="sendWhatsApp()">🚀 Place Order on WhatsApp</button>
+    </div>
 
-<input id="salt" placeholder="Salt">
-
-<input id="company" placeholder="Company">
-
-<input id="mg" placeholder="MG">
-
-<input id="packing" placeholder="Packing">
-
-<input id="mfg" placeholder="MFG">
-
-<input id="expiry" placeholder="Expiry">
-
-<input id="mrp" placeholder="MRP">
-
-<label><b>Medicine Photo</b></label>
-
-<input
-type="file"
-id="imageFile"
-accept="image/*">
-
-<button onclick="saveMedicine()">
-💾 Save Medicine
-</button>
-
-</div>
-
-<div id="medicineContainer"></div>
-
-<div id="popup" class="popup">
-
-<div class="popupBox">
-
-<span class="close" onclick="closePopup()">
-✖
-</span>
-
-<div id="popupContent"></div>
-
-</div>
-
-</div>
-
-<button id="topBtn" onclick="goTop()">
-⬆
-</button>
-
+    <button id="topBtn" onclick="goTop()">⬆</button>
 </div>
 
 <footer class="footer">
-
-<h3>🏥 Wellness Medicare</h3>
-
-<p>Pathanpura, Deoband</p>
-
-<p>Fast • Reliable • Trusted</p>
-
+    <h3>🏥 Wellness Medicare</h3>
+    <p>Pathanpura, Deoband</p>
+    <p>Fast • Reliable • Trusted</p>
 </footer>
 
 <script src="medicines.js"></script>
 <script src="script.js"></script>
-
 </body>
-
 </html>
