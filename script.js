@@ -111,7 +111,9 @@ let container=document.getElementById("medicineContainer");
 container.innerHTML="";
 
 
-list.forEach(m=>{
+[...list]
+.sort((a,b)=>b.id-a.id)
+.forEach(m=>{
 
 
 container.innerHTML += `
