@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Wellness Medicare</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -41,6 +41,11 @@
             <input id="expiry" placeholder="Expiry">
             <input id="mrp" placeholder="MRP (₹)">
         </div>
+        <!-- Recent Category Option -->
+        <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px; background: #f1f5f9; padding: 10px; border-radius: 8px; grid-column: span 2;">
+            <input type="checkbox" id="isRecent" style="width: 18px; height: 18px;">
+            <label for="isRecent" style="font-weight: 600; font-size: 13px; color: #1e293b;">Show in Recently Added (Horizontal Scroll)</label>
+        </div>
         <input type="file" id="imageFile" accept="image/*" style="margin-top:10px;">
         <button onclick="saveMedicine()" class="save-btn">💾 Save Medicine</button>
         <button onclick="logoutAdmin()" style="width:100%; margin-top:5px; background:#666; color:white; border:none; padding:10px; border-radius:8px;">Logout</button>
@@ -51,6 +56,13 @@
             <span class="search-icon">🔍</span>
             <input type="text" id="search" placeholder="Search medicines or salt..." onkeyup="searchMedicine()">
         </div>
+
+        <!-- NEW: Recently Added Category Section -->
+        <div id="recentSection" style="display:none; margin-bottom: 20px;">
+            <h2 class="section-title">✨ Recently Added</h2>
+            <div id="recentMedicineContainer" class="horizontal-scroll"></div>
+        </div>
+
         <div id="medicineContainer" class="medicine-grid"></div>
     </div>
 </div>
