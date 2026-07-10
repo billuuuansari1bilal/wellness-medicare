@@ -1,0 +1,16 @@
+// Firebase Configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAbHFCfnGlvQ_RBZVCXuBZT7ZV79vUwofI",
+  authDomain: "wellness-medicare.firebaseapp.com",
+  projectId: "wellness-medicare",
+  storageBucket: "wellness-medicare.firebasestorage.app",
+  messagingSenderId: "344712009123",
+  appId: "1:344712009123:web:2747240651be1ee1603616",
+  measurementId: "G-VG9ZMJWJGC"
+};
+
+// Initialize Firebase (Compat Version)
+firebase.initializeApp(firebaseConfig);
+
+// Initialize Firestore
+const db = firebase.firestore();
