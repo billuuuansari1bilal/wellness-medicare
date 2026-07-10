@@ -95,7 +95,7 @@ async function deleteMedicine(id) {
     }
 }
 
-// --- Cart & Other Logic ---
+// --- Cart Logic ---
 function openQtyPopup(id){
     currentOrderMedId = id;
     let m = medicineData.find(x => x.id === id);
@@ -134,13 +134,33 @@ function updateCartUI(){
     } else { bar.style.display = "none"; }
 }
 
+// Fixed WhatsApp Message (No 0 values)
 function sendWhatsApp(){
+    if(cart.length === 0) return;
+    
     let message = "🏥 *Wellness Medicare - New Order Request*\n\n";
+    
     cart.forEach((item, index) => {
-        message += `${index + 1}. *${item.name}*\n   Strips: ${item.strips}, Boxes: ${item.boxes}\n\n`;
+        message += `${index + 1}. *${item.name}*\n`;
+        
+        // Agar strips 0 hain toh line add nahi hogi
+        if(item.strips > 0) {
+            message += `   - Strips: ${item.strips}\n`;
+        }
+        
+        // Agar boxes 0 hain toh line add nahi hogi
+        if(item.boxes > 0) {
+            message += `   - Boxes: ${item.boxes}\n`;
+        }
+        
+        message += `\n`;
     });
+
     window.location.href = "https://wa.me/916396832385?text=" + encodeURIComponent(message);
-    cart = []; updateCartUI(); renderMedicines(medicineData);
+    
+    cart = []; 
+    updateCartUI(); 
+    renderMedicines(medicineData);
 }
 
 function searchMedicine(){
