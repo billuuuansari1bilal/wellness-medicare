@@ -1,4 +1,3 @@
-// Firebase Configuration
 const firebaseConfig = {
   apiKey: "AIzaSyAbHFCfnGlvQ_RBZVCXuBZT7ZV79vUwofI",
   authDomain: "wellness-medicare.firebaseapp.com",
@@ -9,7 +8,7 @@ const firebaseConfig = {
   measurementId: "G-VG9ZMJWJGC"
 };
 
-// Initialize Firebase (Compat Version)
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
 // Initialize Firestore
