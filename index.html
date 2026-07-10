@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wellness Medicare</title>
+    <title>Wellness Medicare | Online Pharmacy</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -15,7 +15,7 @@
         <button class="admin-btn-small" onclick="adminLogin()">🔐 Admin Login</button>
     </div>
     <div id="adminPanel" class="admin-panel-box" style="display:none;">
-        <h3>🛠 Inventory Management</h3>
+        <h3>🛠 Inventory Management (Cloud)</h3>
         <div class="admin-grid">
             <input id="brand" placeholder="Brand Name">
             <input id="salt" placeholder="Salt">
@@ -31,7 +31,7 @@
             <input type="file" id="imageFile" accept="image/*">
         </div>
         <div class="admin-btns">
-            <button onclick="saveMedicine()" class="save-btn">💾 Save Medicine</button>
+            <button onclick="saveMedicine()" class="save-btn">💾 Save to Cloud</button>
             <button onclick="logoutAdmin()" class="logout-btn">Logout</button>
         </div>
     </div>
@@ -44,7 +44,7 @@
 
 <div class="container">
     <div class="search-box">
-        <input type="text" id="search" placeholder="Search Medicine, Salt or Company..." onkeyup="searchMedicine()">
+        <input type="text" id="search" placeholder="Search Medicines Online..." onkeyup="searchMedicine()">
     </div>
 
     <div id="medicineContainer" class="medicine-grid"></div>
@@ -93,10 +93,15 @@
 
 <footer class="footer">
     <h3>Wellness Medicare</h3>
-    <p>Pathanpura, Deoband | Fast & Reliable</p>
+    <p>Connected to Google Cloud Real-time Database</p>
 </footer>
 
-<script src="medicines.js"></script>
+<!-- Firebase Libraries (ORDER IS IMPORTANT) -->
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+
+<!-- Your Project Files -->
+<script src="firebase.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
