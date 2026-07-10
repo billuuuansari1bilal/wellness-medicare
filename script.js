@@ -30,13 +30,48 @@ window.onload = () => {
     });
 };
 
+// Common Card Creator Function
+function createCardHTML(m) {
+    let isInCart = cart.find(item => item.id === m.id);
+    return `
+        <div class="card">
+            <img src="${m.image || 'medicine.png'}" class="medicineImage" onclick="viewDetails('${m.id}')">
+            <h2 onclick="viewDetails('${m.id}')">${m.brand}</h2>
+            <button class="btn-details" onclick="viewDetails('${m.id}')">👁 View Details</button>
+            ${isInCart ? `<button class="btn-cart-small" style="background:#dc3545;" onclick="removeFromCart('${m.id}')">✖ Unselect</button>` : `<button class="btn-cart-small" onclick="openQtyPopup('${m.id}')">🛒 Add to Cart</button>`}
+            ${isAdmin ? `<div style="display:flex; gap:4px; margin-top:5px;"><button onclick="editMedicine('${m.id}')" style="flex:1; padding:6px; background:#f1f5f9; border:none; border-radius:6px;">✏️</button><button onclick="deleteMedicine('${m.id}')" style="flex:1; padding:6px; background:#fef2f2; color:red; border:none; border-radius:6px;">🗑️</button></div>` : ""}
+        </div>`;
+}
+
 function renderMedicines(list) {
     let container = document.getElementById("medicineContainer");
+    let recentContainer = document.getElementById("recentMedicineContainer");
+    let recentSection = document.getElementById("recentSection");
+    
     if(!container) return;
     container.innerHTML = "";
-    list.forEach(m => {
-        let isInCart = cart.find(item => item.id === m.id);
-        container.innerHTML += `<div class="card"><img src="${m.image || 'medicine.png'}" class="medicineImage" onclick="viewDetails('${m.id}')"><h2 onclick="viewDetails('${m.id}')">${m.brand}</h2><button class="btn-details" onclick="viewDetails('${m.id}')">👁 View Details</button>${isInCart ? `<button class="btn-cart-small" style="background:#dc3545;" onclick="removeFromCart('${m.id}')">✖ Unselect</button>` : `<button class="btn-cart-small" onclick="openQtyPopup('${m.id}')">🛒 Add to Cart</button>`}${isAdmin ? `<div style="display:flex; gap:4px; margin-top:5px;"><button onclick="editMedicine('${m.id}')" style="flex:1; padding:6px; background:#f1f5f9; border:none; border-radius:6px;">✏️</button><button onclick="deleteMedicine('${m.id}')" style="flex:1; padding:6px; background:#fef2f2; color:red; border:none; border-radius:6px;">🗑️</button></div>` : ""}</div>`;
+    recentContainer.innerHTML = "";
+
+    let isSearching = document.getElementById("search").value.length > 0;
+
+    // Filter Recent vs Normal
+    let recentList = list.filter(m => m.isRecent === true);
+    let normalList = list.filter(m => m.isRecent !== true);
+
+    // Show Horizontal Section if not searching
+    if(recentList.length > 0 && !isSearching) {
+        recentSection.style.display = "block";
+        recentList.forEach(m => {
+            recentContainer.innerHTML += createCardHTML(m);
+        });
+    } else {
+        recentSection.style.display = "none";
+    }
+
+    // Grid View (Show all if searching, else show only normal)
+    let displayList = isSearching ? list : normalList;
+    displayList.forEach(m => {
+        container.innerHTML += createCardHTML(m);
     });
 }
 
@@ -53,6 +88,7 @@ function viewDetails(id) {
 function hideDetails() { document.getElementById("detailView").style.display = "none"; document.getElementById("mainView").style.display = "block"; }
 function removeFromCart(id, refreshDetail = false){ cart = cart.filter(item => item.id !== id); updateCartUI(); renderMedicines(medicineData); if(refreshDetail) viewDetails(id); }
 function changeQty(id, val) { let input = document.getElementById(id); let newVal = (parseInt(input.value) || 0) + val; if (newVal >= 0) input.value = newVal; }
+
 function openQtyPopup(id, refreshDetail = false){
     let m = medicineData.find(x => x.id === id);
     document.getElementById("popTitle").innerText = m.brand;
@@ -65,6 +101,7 @@ function openQtyPopup(id, refreshDetail = false){
         document.getElementById("qtyPopup").style.display = "none";
     };
 }
+
 function closeQtyPopup(){ document.getElementById("qtyPopup").style.display = "none"; }
 function addToCart(id, s, b, refreshDetail = false){ let m = medicineData.find(x => x.id === id); cart.push({ id, name: m.brand, strips: s, boxes: b }); updateCartUI(); renderMedicines(medicineData); if(refreshDetail) viewDetails(id); }
 function updateCartUI(){
@@ -72,21 +109,59 @@ function updateCartUI(){
     if(cart.length > 0){ bar.style.display = "flex"; document.getElementById("cartCount").innerText = cart.length + " Items Selected"; }
     else { bar.style.display = "none"; }
 }
+
 function sendWhatsApp(){
     let msg = "🏥 *Wellness Medicare Order Request*\n\n";
     cart.forEach((item, i) => { msg += `${i+1}. *${item.name}*\n`; if(item.strips > 0) msg += `   - Strips: ${item.strips}\n`; if(item.boxes > 0) msg += `   - Boxes: ${item.boxes}\n`; msg += `\n`; });
     window.location.href = "https://wa.me/916396832385?text=" + encodeURIComponent(msg);
     cart = []; updateCartUI(); renderMedicines(medicineData);
 }
+
 function searchMedicine(){ let val = document.getElementById("search").value.toLowerCase(); let res = medicineData.filter(m => m.brand.toLowerCase().includes(val) || m.salt.toLowerCase().includes(val)); renderMedicines(res); }
+
 function adminLogin(){ if(prompt("Admin Password") === ADMIN_PASSWORD){ isAdmin = true; document.getElementById("adminPanel").style.display = "block"; renderMedicines(medicineData); } }
+
 async function saveMedicine() {
-    const med = { brand: document.getElementById("brand").value, salt: document.getElementById("salt").value, company: document.getElementById("company").value, mg: document.getElementById("mg").value, packing: document.getElementById("packing").value, mfg: document.getElementById("mfg").value, expiry: document.getElementById("expiry").value, mrp: document.getElementById("mrp").value, image: selectedImage || "medicine.png", createdAt: new Date() };
+    const med = { 
+        brand: document.getElementById("brand").value, 
+        salt: document.getElementById("salt").value, 
+        company: document.getElementById("company").value, 
+        mg: document.getElementById("mg").value, 
+        packing: document.getElementById("packing").value, 
+        mfg: document.getElementById("mfg").value, 
+        expiry: document.getElementById("expiry").value, 
+        mrp: document.getElementById("mrp").value, 
+        image: selectedImage || "medicine.png", 
+        isRecent: document.getElementById("isRecent").checked,
+        createdAt: new Date() 
+    };
     if(editId === null) await db.collection("medicines").add(med);
     else await db.collection("medicines").doc(editId).update(med);
     alert("Saved Successfully!"); clearForm();
 }
-function editMedicine(id){ let m = medicineData.find(x => x.id === id); editId = id; document.getElementById("brand").value = m.brand; document.getElementById("salt").value = m.salt; document.getElementById("mrp").value = m.mrp; selectedImage = m.image; window.scrollTo({top: 0, behavior: 'smooth'}); }
+
+function editMedicine(id){ 
+    let m = medicineData.find(x => x.id === id); 
+    editId = id; 
+    document.getElementById("brand").value = m.brand; 
+    document.getElementById("salt").value = m.salt; 
+    document.getElementById("company").value = m.company;
+    document.getElementById("mg").value = m.mg;
+    document.getElementById("packing").value = m.packing;
+    document.getElementById("mfg").value = m.mfg;
+    document.getElementById("expiry").value = m.expiry;
+    document.getElementById("mrp").value = m.mrp; 
+    document.getElementById("isRecent").checked = m.isRecent || false;
+    selectedImage = m.image; 
+    window.scrollTo({top: 0, behavior: 'smooth'}); 
+}
+
 function deleteMedicine(id){ if(confirm("Delete Permanently?")) db.collection("medicines").doc(id).delete(); }
-function clearForm(){ document.querySelectorAll("#adminPanel input").forEach(i => i.value=""); editId = null; }
+
+function clearForm(){ 
+    document.querySelectorAll("#adminPanel input[type='text'], #adminPanel input[type='number']").forEach(i => i.value=""); 
+    document.getElementById("isRecent").checked = false;
+    editId = null; 
+}
+
 function logoutAdmin(){ isAdmin = false; document.getElementById("adminPanel").style.display = "none"; renderMedicines(medicineData); }
