@@ -3,104 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wellness Medicare | Online Pharmacy</title>
+    <title>Wellness Medicare</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<!-- Admin Section at the Top -->
 <div class="admin-top-bar">
-    <div id="adminAuth">
-        <button class="admin-btn-small" onclick="adminLogin()">🔐 Admin Login</button>
-    </div>
+    <button class="admin-btn-small" onclick="adminLogin()">🔐 Admin Login</button>
+</div>
+
+<div id="mainView">
     <div id="adminPanel" class="admin-panel-box" style="display:none;">
-        <h3>🛠 Inventory Management (Cloud)</h3>
+        <h3>🛠 Cloud Management</h3>
         <div class="admin-grid">
             <input id="brand" placeholder="Brand Name">
             <input id="salt" placeholder="Salt">
             <input id="company" placeholder="Company">
             <input id="mg" placeholder="MG">
             <input id="packing" placeholder="Packing">
-            <input id="mfg" placeholder="MFG (e.g. 01/24)">
-            <input id="expiry" placeholder="Expiry (e.g. 12/26)">
+            <input id="mfg" placeholder="MFG">
+            <input id="expiry" placeholder="Expiry">
             <input id="mrp" placeholder="MRP (₹)">
         </div>
-        <div class="admin-file">
-            <label>Medicine Image:</label>
-            <input type="file" id="imageFile" accept="image/*">
-        </div>
+        <input type="file" id="imageFile" accept="image/*" style="margin-top:10px;">
         <div class="admin-btns">
-            <button onclick="saveMedicine()" class="save-btn">💾 Save to Cloud</button>
+            <button onclick="saveMedicine()" class="save-btn">💾 Save</button>
             <button onclick="logoutAdmin()" class="logout-btn">Logout</button>
         </div>
     </div>
+
+    <header class="header">
+        <h1>🏥 Wellness Medicare</h1>
+        <p>Pathanpura, Deoband</p>
+    </header>
+
+    <div class="container">
+        <div class="search-box">
+            <input type="text" id="search" placeholder="Search medicines..." onkeyup="searchMedicine()">
+        </div>
+        <div id="medicineContainer" class="medicine-grid"></div>
+    </div>
 </div>
 
-<header class="header">
-    <h1>🏥 Wellness Medicare</h1>
-    <p>📍 Pathanpura, Deoband</p>
-</header>
-
-<div class="container">
-    <div class="search-box">
-        <input type="text" id="search" placeholder="Search Medicines Online..." onkeyup="searchMedicine()">
+<div id="detailView" class="detail-page" style="display:none;">
+    <div class="top-nav">
+        <button class="modern-back-btn" onclick="hideDetails()">⬅ Back</button>
     </div>
-
-    <div id="medicineContainer" class="medicine-grid"></div>
-
-    <!-- Selection Popup -->
-    <div id="qtyPopup" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeQtyPopup()">&times;</span>
-            <h3 id="popTitle">Select Quantity</h3>
-            <div class="qty-group">
-                <div class="qty-item">
-                    <label>Strips</label>
-                    <input type="number" id="stripQty" value="0" min="0">
-                </div>
-                <div class="qty-item">
-                    <label>Boxes</label>
-                    <input type="number" id="boxQty" value="0" min="0">
-                </div>
-            </div>
-            <button id="confirmAddBtn" class="confirm-btn">Add to Cart</button>
-        </div>
-    </div>
-
-    <!-- Modern Floating Cart Bar -->
-    <div id="bottomCartBar" class="cart-bar-modern" style="display: none;">
-        <div class="cart-content">
-            <div class="cart-info-box">
-                <div class="cart-icon-wrapper">
-                    🛒
-                    <span id="cartBadge" class="badge-count">0</span>
-                </div>
-                <div class="cart-text-details">
-                    <span id="cartCount">0 Items Selected</span>
-                    <small>Ready to place order</small>
-                </div>
-            </div>
-            <button class="whatsapp-btn-new" onclick="sendWhatsApp()">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" width="20">
-                Place Order
-            </button>
-        </div>
-    </div>
-
-    <button id="topBtn" onclick="goTop()">⬆</button>
+    <div id="detailContent"></div>
 </div>
 
-<footer class="footer">
-    <h3>Wellness Medicare</h3>
-    <p>Connected to Google Cloud Real-time Database</p>
-</footer>
+<div id="qtyPopup" class="modal" style="display:none;">
+    <div class="modal-content-modern">
+        <span class="close-icon" onclick="closeQtyPopup()">&times;</span>
+        <h3 id="popTitle">Quantity</h3>
+        <p style="font-size:12px; color:#666; margin-bottom:15px;">Adjust strips and boxes</p>
+        <div class="qty-control-row">
+            <label>Strips</label>
+            <div class="stepper">
+                <button onclick="changeQty('stripQty', -1)">−</button>
+                <input type="number" id="stripQty" value="0" readonly>
+                <button onclick="changeQty('stripQty', 1)">+</button>
+            </div>
+        </div>
+        <div class="qty-control-row">
+            <label>Boxes</label>
+            <div class="stepper">
+                <button onclick="changeQty('boxQty', -1)">−</button>
+                <input type="number" id="boxQty" value="0" readonly>
+                <button onclick="changeQty('boxQty', 1)">+</button>
+            </div>
+        </div>
+        <button id="confirmAddBtn" class="confirm-btn-premium">Confirm & Add</button>
+    </div>
+</div>
 
-<!-- Firebase Libraries (ORDER IS IMPORTANT) -->
+<div id="bottomCartBar" class="cart-bar-modern" style="display: none;">
+    <div class="cart-content">
+        <span>🛒 <b id="cartCount">0 Items</b></span>
+        <button class="whatsapp-btn-new" onclick="sendWhatsApp()">Order Now</button>
+    </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
-
-<!-- Your Project Files -->
 <script src="firebase.js"></script>
 <script src="script.js"></script>
 </body>
