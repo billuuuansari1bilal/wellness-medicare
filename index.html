@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Wellness Medicare</title>
+    <title>Billuuu pharma</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -15,57 +15,94 @@
         <h3>Menu</h3>
         <span class="close-sidebar" onclick="closeSidebar()">&times;</span>
     </div>
-    <a href="#" onclick="adminLogin(); closeSidebar();">🔐 Admin Panel</a>
-    <a href="#" onclick="showAbout(); closeSidebar();">ℹ️ About Us</a>
-    <a href="#" onclick="closeSidebar()">🏠 Home</a>
+    <div class="sidebar-links">
+        <a href="#" onclick="adminLogin(); closeSidebar();">🔐 Admin Panel</a>
+        <a href="#" onclick="showAbout(); closeSidebar();">ℹ️ About Us</a>
+        <a href="#" onclick="closeSidebar()">🏠 Home</a>
+    </div>
 </div>
 
 <div id="mainView">
     <header class="header">
-        <span class="menu-icon" onclick="openSidebar()">&#9776;</span>
+        <div class="menu-icon" onclick="openSidebar()">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
         <div class="header-text">
-            <h1>🏥 Wellness Medicare</h1>
-            <p>Pathanpura, Deoband</p>
+            <h1 class="main-logo">Billuuu <span class="pharma-text">pharma</span></h1>
         </div>
     </header>
 
+    <!-- Admin Panel -->
     <div id="adminPanel" class="admin-panel-box" style="display:none;">
-        <h3>🛠 Cloud Management</h3>
+        <h3>Manage Store</h3>
         <div class="admin-grid">
             <input id="brand" placeholder="Brand Name">
             <input id="salt" placeholder="Salt">
             <input id="company" placeholder="Company">
-            <input id="mg" placeholder="MG">
+            <input id="mg" placeholder="Composition/MG">
             <input id="packing" placeholder="Packing">
-            <input id="mfg" placeholder="MFG">
-            <input id="expiry" placeholder="Expiry">
+            <input id="mfg" placeholder="MFG Date">
+            <input id="expiry" placeholder="Expiry Date">
             <input id="mrp" placeholder="MRP (₹)">
+            <select id="medCategory" class="admin-select">
+                <option value="">Select Category</option>
+            </select>
         </div>
-        <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px; background: #f1f5f9; padding: 10px; border-radius: 8px; grid-column: span 2;">
-            <input type="checkbox" id="isRecent" style="width: 18px; height: 18px;">
-            <label for="isRecent" style="font-weight: 600; font-size: 13px; color: #1e293b;">Show in Recently Added</label>
+        <div class="admin-checkbox-group">
+            <div class="check-item"><input type="checkbox" id="isRecent"> <label>Recent</label></div>
+            <div class="check-item"><input type="checkbox" id="isEthical"> <label>Ethical</label></div>
+            <div class="check-item"><input type="checkbox" id="isCollection"> <label>Collection</label></div>
         </div>
         <input type="file" id="imageFile" accept="image/*" style="margin-top:10px;">
         <button onclick="saveMedicine()" class="save-btn">💾 Save Medicine</button>
-        <button onclick="logoutAdmin()" style="width:100%; margin-top:5px; background:#666; color:white; border:none; padding:10px; border-radius:8px;">Logout</button>
+        
+        <div class="admin-cat-section">
+            <h4>📁 Categories</h4>
+            <div style="display: flex; gap: 8px; margin-top:5px;">
+                <input id="newCatName" placeholder="New Cat Name" style="flex:1; padding:8px;">
+                <button onclick="addCategory()" class="add-cat-btn">Add</button>
+            </div>
+            <div id="adminCatList" class="admin-cat-list"></div>
+        </div>
+        <button onclick="logoutAdmin()" class="logout-btn">Logout</button>
     </div>
 
-    <div class="container">
-        <div class="search-container">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="search" placeholder="Search medicines or salt..." onkeyup="searchMedicine()">
-        </div>
-
-        <div id="recentSection" style="display:none; margin-bottom: 25px;">
-            <h2 class="section-title recent-theme">✨ Recently Added</h2>
-            <div id="recentMedicineContainer" class="horizontal-scroll"></div>
-        </div>
-
-        <div id="allMedsSection">
-            <h2 class="section-title all-meds-theme">📦 Medicine Collection</h2>
-            <div id="medicineContainer" class="medicine-grid"></div>
+    <!-- Home View Content -->
+    <div id="homeContent">
+        <div class="container">
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search" placeholder="Search medicines..." onkeyup="searchMedicine()">
+            </div>
+            <div id="recentSection" style="display:none; margin-bottom: 25px;">
+                <h2 class="section-title recent-theme">✨ Recently Added</h2>
+                <div id="recentMedicineContainer" class="horizontal-scroll"></div>
+            </div>
+            <div id="allMedsSection">
+                <h2 id="collectionTitle" class="section-title all-meds-theme">📦 Medicine Collection</h2>
+                <div id="medicineContainer" class="medicine-grid"></div>
+            </div>
         </div>
     </div>
+
+    <!-- Flipkart Style Category View Content -->
+    <div id="categoryContent" style="display:none;">
+        <div class="flipkart-cat-layout">
+            <div id="catSidebar" class="cat-sidebar"></div>
+            <div class="cat-main-content">
+                <h2 id="selectedCatTitle" class="cat-page-title">Category</h2>
+                <div id="catMedicineGrid" class="medicine-list-view"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-nav-attached">
+    <div id="catNavBtn" class="nav-item" onclick="switchView('categories')">📁 Categories</div>
+    <div id="homeNav" class="nav-item active" onclick="switchView('home')">🏠 Home</div>
+    <div id="ethicalNav" class="nav-item" onclick="switchView('ethical')">💊 Ethical</div>
 </div>
 
 <div id="detailView" class="detail-page" style="display:none;">
@@ -79,7 +116,6 @@
     <div class="modal-content-modern">
         <span class="close-icon-highlighted" onclick="closeQtyPopup()">&times;</span>
         <h3 id="popTitle">Quantity</h3>
-        <p style="font-size:12px; color:#666; margin-bottom:15px;">Adjust strips and boxes</p>
         <div class="qty-control-row">
             <label>Strips</label>
             <div class="stepper">
@@ -101,7 +137,7 @@
 </div>
 
 <div id="bottomCartBar" class="cart-bar-modern" style="display: none;">
-    <div class="cart-content">
+    <div class="cart-content-fixed">
         <span>🛒 <b id="cartCount">0 Items Selected</b></span>
         <button class="whatsapp-btn-new" onclick="sendWhatsApp()">Order Now</button>
     </div>
