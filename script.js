@@ -1,5 +1,5 @@
 const ADMIN_PASSWORD = "BilalAnsariNaziyaSalmani";
-let medicineData = []; let categories = []; let cart = []; let editId = null; let isAdmin = false; let selectedImage = ""; let lastScrollPos = 0; let currentView = 'home'; let activeCategory = "";
+let medicineData = []; let categories = []; let cart = []; let editId = null; let isAdmin = false; let selectedImages = []; let lastScrollPos = 0; let currentView = 'home'; let activeCategory = "";
 
 function openSidebar() { document.getElementById("mySidebar").style.width = "280px"; document.getElementById("sidebarOverlay").style.display = "block"; }
 function closeSidebar() { document.getElementById("mySidebar").style.width = "0"; document.getElementById("sidebarOverlay").style.display = "none"; }
@@ -14,15 +14,47 @@ window.onload = () => {
         categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         updateCategoryUI();
     });
-    document.getElementById("imageFile").addEventListener("change", function(){
-        const reader = new FileReader();
-        reader.onload = (e) => { selectedImage = e.target.result; };
-        if(this.files[0]) reader.readAsDataURL(this.files[0]);
+    document.getElementById("imageFiles").addEventListener("change", function(){
+        selectedImages = [];
+        let prevRow = document.getElementById("imagePreviewRow");
+        prevRow.innerHTML = '<span style="font-size:11px;color:#008296;font-weight:700;">⏳ Photos compress ho rahi hain...</span>';
+        let files = Array.from(this.files);
+        let readAndCompress = (file) => new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                let img = new Image();
+                img.onload = () => {
+                    let canvas = document.createElement('canvas');
+                    let scale = Math.min(1, 900 / img.width);
+                    canvas.width = img.width * scale;
+                    canvas.height = img.height * scale;
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.72));
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+        Promise.all(files.map(readAndCompress)).then(results => {
+            selectedImages = results;
+            prevRow.innerHTML = "";
+            results.forEach(src => {
+                let thumb = document.createElement("img");
+                thumb.src = src;
+                thumb.style.cssText = "width:50px;height:50px;object-fit:cover;border-radius:8px;border:2px solid #008296;";
+                prevRow.appendChild(thumb);
+            });
+            let done = document.createElement("span");
+            done.style.cssText = "font-size:11px;color:#198754;font-weight:700;display:block;margin-top:4px;";
+            done.innerText = `✅ ${results.length} photo${results.length > 1 ? 'en' : ''} ready — ab Save karo`;
+            prevRow.appendChild(done);
+        });
     });
 };
 
 function switchView(view) {
     currentView = view;
+    document.getElementById("search").value = "";
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     document.getElementById("homeContent").style.display = (view === 'home' || view === 'ethical') ? "block" : "none";
     document.getElementById("categoryContent").style.display = (view === 'categories') ? "block" : "none";
@@ -32,7 +64,7 @@ function switchView(view) {
         document.getElementById('catNavBtn').classList.add('active');
         if(categories.length > 0 && !activeCategory) selectCategory(categories[0].name);
     }
-    renderMedicines(medicineData); window.scrollTo(0,0);
+    renderMedicines(medicineData); updateCartUI(); window.scrollTo(0,0);
 }
 
 function selectCategory(catName) {
@@ -48,7 +80,27 @@ function renderCategoryMedicines() {
     let container = document.getElementById("catMedicineGrid");
     container.innerHTML = "";
     let filtered = medicineData.filter(m => m.category === activeCategory);
-    filtered.forEach(m => { container.innerHTML += createCardHTML(m, 'collection'); });
+    filtered.forEach(m => { container.innerHTML += createListCardHTML(m); });
+}
+
+function createListCardHTML(m) {
+    let isInCart = cart.find(item => item.id === m.id);
+    let adminButtons = isAdmin ? `<div style="display:flex; gap:5px; margin-top:6px;"><button onclick="editMedicine('${m.id}')" style="flex:1; padding:5px; background:#fff; border:1px solid #ddd; border-radius:5px;">✏️</button><button onclick="deleteMedicine('${m.id}')" style="flex:1; padding:5px; background:#fff; color:red; border:1px solid #ddd; border-radius:5px;">🗑️</button></div>` : "";
+    let thumbSrc = (m.images && m.images.length > 0) ? m.images[0] : (m.image || 'medicine.png');
+    return `<div class="card list-card">
+        <h2 onclick="viewDetails('${m.id}')" style="cursor:pointer; text-align:center; margin-bottom:10px;">${m.brand}</h2>
+        <div class="list-card-body">
+            <img src="${thumbSrc}" class="list-card-img" onclick="viewDetails('${m.id}')">
+            <div class="list-card-actions">
+                <button class="btn-details" onclick="viewDetails('${m.id}')">View Details</button>
+                ${isInCart
+                    ? `<button class="btn-cart-small" style="background:#dc3545;" onclick="removeFromCart('${m.id}')">Remove</button>`
+                    : `<button class="btn-cart-small" onclick="openQtyPopup('${m.id}')">Add to Cart</button>`
+                }
+                ${adminButtons}
+            </div>
+        </div>
+    </div>`;
 }
 
 function createCardHTML(m, type) {
@@ -64,25 +116,23 @@ function renderMedicines(list) {
     let recentSection = document.getElementById("recentSection");
     if(!container) return;
     container.innerHTML = ""; recentContainer.innerHTML = "";
-    let searchInput = document.getElementById("search").value.toLowerCase();
     
     if(currentView === 'ethical') {
         recentSection.style.display = "none";
         document.getElementById("collectionTitle").innerText = "Ethical Medicines";
         container.className = "medicine-list-view";
         let filtered = list.filter(m => m.isEthical === true);
-        filtered.forEach(m => { container.innerHTML += createCardHTML(m, 'ethical'); });
+        filtered.forEach(m => { container.innerHTML += createListCardHTML(m); });
     } else {
         document.getElementById("collectionTitle").innerText = "Medicine Collection";
         container.className = "medicine-grid";
         let recentList = list.filter(m => m.isRecent === true);
         let collectionList = list.filter(m => m.isCollection === true || (m.isEthical !== true && m.isRecent !== true));
-        if(recentList.length > 0 && searchInput === "") {
+        if(recentList.length > 0) {
             recentSection.style.display = "block";
             recentList.forEach(m => { recentContainer.innerHTML += createCardHTML(m, 'recent'); });
         } else { recentSection.style.display = "none"; }
-        let displayList = searchInput !== "" ? list.filter(m => m.brand.toLowerCase().includes(searchInput)) : collectionList;
-        displayList.forEach(m => { container.innerHTML += createCardHTML(m, 'collection'); });
+        collectionList.forEach(m => { container.innerHTML += createCardHTML(m, 'collection'); });
     }
 }
 
@@ -90,8 +140,14 @@ function viewDetails(id) {
     let m = medicineData.find(x => x.id === id); if(!m) return;
     lastScrollPos = window.pageYOffset || document.documentElement.scrollTop;
     let isInCart = cart.find(item => item.id === m.id);
+    let images = (m.images && m.images.length > 0) ? m.images : [m.image || 'medicine.png'];
+    let slidesHTML = images.map(img => `<div class="gallery-slide"><img src="${img}" class="detail-img"></div>`).join('');
+    let dotsHTML = images.length > 1 ? `<div class="gallery-dots" id="galleryDots">${images.map((_, i) => `<span class="gallery-dot ${i===0?'active':''}" onclick="goToSlide(${i})"></span>`).join('')}</div>` : '';
     document.getElementById("detailContent").innerHTML = `
-        <img src="${m.image || 'medicine.png'}" class="detail-img">
+        <div class="gallery-container">
+            <div class="gallery-track" id="galleryTrack">${slidesHTML}</div>
+        </div>
+        ${dotsHTML}
         <div class="detail-info-card">
             <div class="detail-name-box">
                 <h1>${m.brand}</h1>
@@ -108,13 +164,15 @@ function viewDetails(id) {
                 ? `<button class="confirm-btn-premium" style="background:#dc3545;" onclick="removeFromCart('${m.id}', true)">✖ Remove Item</button>`
                 : `<button class="confirm-btn-premium" onclick="openQtyPopup('${m.id}', true)">🛒 Add to Cart Now</button>`
             }
-        </div>`;
+        </div>
+        `;
     document.getElementById("mainView").style.display = "none";
     document.getElementById("bottomCartBar").style.display = "none";
     document.getElementById("detailView").style.display = "flex";
+    setTimeout(initGalleryScroll, 100);
     let detailOrderBar = document.getElementById("detailOrderBar");
     let detailCartCount = document.getElementById("detailCartCount");
-    if (isInCart) {
+    if (cart.length > 0) {
         detailOrderBar.style.display = "block";
         detailCartCount.innerText = cart.length + " Items Selected";
     } else {
@@ -127,6 +185,28 @@ function hideDetails() {
     document.getElementById("mainView").style.display = "block"; 
     updateCartUI();
     setTimeout(() => { window.scrollTo(0, lastScrollPos); }, 1);
+}
+
+function goToSlide(index) {
+    let track = document.getElementById("galleryTrack");
+    if (!track) return;
+    let slideWidth = track.offsetWidth;
+    track.scrollTo({ left: slideWidth * index, behavior: 'smooth' });
+    updateGalleryDots(index);
+}
+
+function updateGalleryDots(activeIndex) {
+    let dots = document.querySelectorAll(".gallery-dot");
+    dots.forEach((d, i) => d.classList.toggle("active", i === activeIndex));
+}
+
+function initGalleryScroll() {
+    let track = document.getElementById("galleryTrack");
+    if (!track) return;
+    track.addEventListener("scroll", () => {
+        let index = Math.round(track.scrollLeft / track.offsetWidth);
+        updateGalleryDots(index);
+    });
 }
 
 function removeFromCart(id, refreshDetail = false){ cart = cart.filter(item => item.id !== id); updateCartUI(); renderMedicines(medicineData); if(currentView === 'categories') renderCategoryMedicines(); if(refreshDetail) viewDetails(id); }
@@ -159,7 +239,31 @@ function sendWhatsApp(){
     cart = []; updateCartUI(); renderMedicines(medicineData);
 }
 
-function searchMedicine(){ renderMedicines(medicineData); }
+function searchMedicine() {
+    let q = document.getElementById("search").value.toLowerCase().trim();
+    if (q === "") {
+        document.getElementById("homeContent").style.display = (currentView === 'home' || currentView === 'ethical') ? "block" : "none";
+        document.getElementById("categoryContent").style.display = (currentView === 'categories') ? "block" : "none";
+        renderMedicines(medicineData);
+        if (currentView === 'categories') renderCategoryMedicines();
+        return;
+    }
+    // Global search — brand + salt + company teeno me
+    let results = medicineData.filter(m =>
+        (m.brand && m.brand.toLowerCase().includes(q)) ||
+        (m.salt && m.salt.toLowerCase().includes(q)) ||
+        (m.company && m.company.toLowerCase().includes(q))
+    );
+    document.getElementById("homeContent").style.display = "block";
+    document.getElementById("categoryContent").style.display = "none";
+    document.getElementById("recentSection").style.display = "none";
+    document.getElementById("collectionTitle").innerText = results.length > 0 ? `${results.length} Result${results.length > 1 ? 's' : ''} Found` : "Koi medicine nahi mili";
+    let container = document.getElementById("medicineContainer");
+    container.className = "medicine-grid";
+    container.innerHTML = "";
+    results.forEach(m => { container.innerHTML += createCardHTML(m, 'collection'); });
+}
+
 function adminLogin(){ if(prompt("Password") === ADMIN_PASSWORD){ isAdmin = true; document.getElementById("adminPanel").style.display = "block"; renderMedicines(medicineData); } }
 function updateCategoryUI() {
     let dropdown = document.getElementById("medCategory");
@@ -176,7 +280,17 @@ function updateCategoryUI() {
 async function addCategory() { let name = document.getElementById("newCatName").value.trim(); if(name) { await db.collection("categories").add({ name: name }); document.getElementById("newCatName").value = ""; } }
 async function deleteCategory(id) { if(confirm("Delete?")) await db.collection("categories").doc(id).delete(); }
 async function saveMedicine() {
-    const med = { brand: document.getElementById("brand").value, salt: document.getElementById("salt").value, company: document.getElementById("company").value, mg: document.getElementById("mg").value, packing: document.getElementById("packing").value, mfg: document.getElementById("mfg").value, expiry: document.getElementById("expiry").value, mrp: document.getElementById("mrp").value, category: document.getElementById("medCategory").value, image: selectedImage || "medicine.png", isRecent: document.getElementById("isRecent").checked, isEthical: document.getElementById("isEthical").checked, isCollection: document.getElementById("isCollection").checked, createdAt: new Date() };
+    let finalImages = selectedImages.filter(Boolean);
+    let med = { brand: document.getElementById("brand").value, salt: document.getElementById("salt").value, company: document.getElementById("company").value, mg: document.getElementById("mg").value, packing: document.getElementById("packing").value, mfg: document.getElementById("mfg").value, expiry: document.getElementById("expiry").value, mrp: document.getElementById("mrp").value, category: document.getElementById("medCategory").value, isRecent: document.getElementById("isRecent").checked, isEthical: document.getElementById("isEthical").checked, isCollection: document.getElementById("isCollection").checked, createdAt: new Date() };
+    if(finalImages.length > 0) {
+        med.images = finalImages;
+        med.image = finalImages[0];
+    } else if(editId !== null) {
+        let existing = medicineData.find(x => x.id === editId);
+        if(existing) { med.images = existing.images || []; med.image = existing.image || "medicine.png"; }
+    } else {
+        med.images = []; med.image = "medicine.png";
+    }
     if(editId === null) await db.collection("medicines").add(med); else await db.collection("medicines").doc(editId).update(med);
     alert("Saved!"); clearForm();
 }
@@ -184,8 +298,18 @@ function editMedicine(id){
     let m = medicineData.find(x => x.id === id); editId = id; 
     document.getElementById("brand").value = m.brand; document.getElementById("salt").value = m.salt; document.getElementById("company").value = m.company; document.getElementById("mg").value = m.mg; document.getElementById("packing").value = m.packing; document.getElementById("mfg").value = m.mfg; document.getElementById("expiry").value = m.expiry; document.getElementById("mrp").value = m.mrp; document.getElementById("medCategory").value = m.category || "";
     document.getElementById("isRecent").checked = m.isRecent || false; document.getElementById("isEthical").checked = m.isEthical || false; document.getElementById("isCollection").checked = m.isCollection || false;
-    selectedImage = m.image; window.scrollTo({top: 0, behavior: 'smooth'}); 
+    selectedImages = [];
+    let prevRow = document.getElementById("imagePreviewRow"); prevRow.innerHTML = "";
+    let imgs = (m.images && m.images.length > 0) ? m.images : (m.image ? [m.image] : []);
+    imgs.forEach((src, idx) => {
+        selectedImages[idx] = src;
+        let thumb = document.createElement("img");
+        thumb.src = src;
+        thumb.style.cssText = "width:50px;height:50px;object-fit:cover;border-radius:8px;border:2px solid #008296;";
+        prevRow.appendChild(thumb);
+    });
+    window.scrollTo({top: 0, behavior: 'smooth'}); 
 }
 function deleteMedicine(id){ if(confirm("Delete?")) db.collection("medicines").doc(id).delete(); }
-function clearForm(){ document.querySelectorAll("#adminPanel input").forEach(i => i.type !== "checkbox" ? i.value="" : i.checked = false); editId = null; }
+function clearForm(){ document.querySelectorAll("#adminPanel input").forEach(i => i.type !== "checkbox" ? i.value="" : i.checked = false); editId = null; selectedImages = []; document.getElementById("imagePreviewRow").innerHTML = ""; }
 function logoutAdmin(){ isAdmin = false; document.getElementById("adminPanel").style.display = "none"; renderMedicines(medicineData); }
