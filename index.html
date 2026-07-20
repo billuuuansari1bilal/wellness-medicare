@@ -56,7 +56,7 @@
             <div class="check-item"><input type="checkbox" id="isCollection"> <label>Collection</label></div>
         </div>
         <div style="margin-top:10px;">
-            <label style="font-size:12px; font-weight:700; color:#475569;">📷 Photos (1 ya jyada select karo)</label>
+            <label style="font-size:12px; font-weight:700; color:#475569;">📷 Photos (select one or more)</label>
             <input type="file" id="imageFiles" accept="image/*" multiple style="display:block; margin-top:5px; width:100%;">
             <div id="imagePreviewRow" style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;"></div>
         </div>
@@ -73,11 +73,11 @@
         <button onclick="logoutAdmin()" class="logout-btn">Logout</button>
     </div>
 
-    <!-- Global Search Bar — always visible -->
+    <!-- Global Search Bar -->
     <div class="global-search-wrap">
         <div class="search-container">
             <span class="search-icon">🔍</span>
-            <input type="text" id="search" placeholder="Brand, Salt ya Company search karo..." onkeyup="searchMedicine()">
+            <input type="text" id="search" placeholder="Search by Brand, Salt or Company..." onkeyup="searchMedicine()">
         </div>
     </div>
 
@@ -95,7 +95,7 @@
         </div>
     </div>
 
-    <!-- Flipkart Style Category View Content -->
+    <!-- Category View -->
     <div id="categoryContent" style="display:none;">
         <div class="flipkart-cat-layout">
             <div id="catSidebar" class="cat-sidebar"></div>
