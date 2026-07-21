@@ -95,13 +95,7 @@ function buildEmptyStateHTML(query, customMessage) {
     let queryLine = query
         ? `<p class="empty-state-query">No medicine found for "<strong>${query}</strong>"</p>`
         : `<p class="empty-state-query">${customMessage}</p>`;
-    return `
-    <div class="empty-state-wrap" style="grid-column: 1 / -1; width: 100%;">
-        <div class="empty-pill-icon">💊</div>
-        <p class="empty-state-title">Medicine Not Found</p>
-        ${queryLine}
-        <span class="empty-state-hint">🔍 Try searching by Brand, Salt or Company</span>
-    </div>`;
+    return `<div class="empty-state-wrap" style="grid-column: 1 / -1; width: 100%;"><div class="empty-pill-icon">💊</div><p class="empty-state-title">Medicine Not Found</p>${queryLine}<span class="empty-state-hint">🔍 Try searching by Brand, Salt or Company</span></div>`;
 }
 
 function createListCardHTML(m) {
@@ -166,6 +160,7 @@ function renderMedicines(list) {
         }
     }
 }
+
 function viewDetails(id) {
     let m = medicineData.find(x => x.id === id); if(!m) return;
     lastScrollPos = window.pageYOffset || document.documentElement.scrollTop;
@@ -229,7 +224,6 @@ function removeFromCart(id, refreshDetail = false) {
 }
 
 function changeQty(id, val) { let input = document.getElementById(id); let newVal = (parseInt(input.value) || 0) + val; if (newVal >= 0) input.value = newVal; }
-
 function openQtyPopup(id, refreshDetail = false) {
     if(!refreshDetail) lastScrollPos = window.pageYOffset || document.documentElement.scrollTop;
     let m = medicineData.find(x => x.id === id);
