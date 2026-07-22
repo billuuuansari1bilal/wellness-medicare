@@ -119,6 +119,19 @@
     </div>
 </div>
 
+<div id="adminLoginModal" style="display:none; position:fixed; z-index:70000; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.6); align-items:center; justify-content:center;">
+    <div style="background:white; padding:28px 24px; border-radius:20px; width:85%; max-width:340px; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <div style="text-align:center; margin-bottom:18px;">
+            <div style="font-size:36px; margin-bottom:8px;">🔐</div>
+            <h3 style="font-size:18px; font-weight:800; color:#1e293b;">Billuuu Pharma</h3>
+            <p style="font-size:13px; color:#64748b; margin-top:4px;">Admin Panel Access</p>
+        </div>
+        <input type="password" id="adminPasswordInput" placeholder="Enter Password" style="width:100%; padding:12px 15px; border:1.5px solid #e2e8f0; border-radius:12px; font-size:15px; outline:none; margin-bottom:14px;">
+        <button onclick="submitAdminLogin()" style="width:100%; padding:13px; background:#008296; color:white; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer;">Login</button>
+        <button onclick="closeAdminLogin()" style="width:100%; padding:11px; background:#f1f5f9; color:#64748b; border:none; border-radius:12px; font-size:14px; font-weight:600; cursor:pointer; margin-top:8px;">Cancel</button>
+    </div>
+</div>
+
 <div id="qtyPopup" class="modal" style="display:none;">
     <div class="modal-content-modern">
         <span class="close-icon-highlighted" onclick="closeQtyPopup()">&times;</span>
