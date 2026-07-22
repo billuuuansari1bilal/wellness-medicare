@@ -102,22 +102,7 @@ function createListCardHTML(m) {
     let isInCart = cart.find(item => item.id === m.id);
     let adminButtons = isAdmin ? `<div style="display:flex; gap:5px; margin-top:6px;"><button onclick="editMedicine('${m.id}')" style="flex:1; padding:5px; background:#fff; border:1px solid #ddd; border-radius:5px;">✏️</button><button onclick="deleteMedicine('${m.id}')" style="flex:1; padding:5px; background:#fff; color:red; border:1px solid #ddd; border-radius:5px;">🗑️</button></div>` : "";
     let thumbSrc = (m.images && m.images.length > 0) ? m.images[0] : (m.image || PLACEHOLDER_IMG);
-    return `<div class="card list-card">
-        <div class="list-card-body">
-            <div class="list-card-left">
-                <p class="list-card-name" onclick="viewDetails('${m.id}')">${m.brand}</p>
-                <img src="${thumbSrc}" class="list-card-img" onclick="viewDetails('${m.id}')" onerror="this.src='${PLACEHOLDER_IMG}'">
-            </div>
-            <div class="list-card-actions">
-                <button class="btn-details" onclick="viewDetails('${m.id}')">View Details</button>
-                ${isInCart
-                    ? `<button class="btn-cart-small" style="background:#dc3545;" onclick="removeFromCart('${m.id}')">Remove</button>`
-                    : `<button class="btn-cart-small" onclick="openQtyPopup('${m.id}')">Add to Cart</button>`
-                }
-                ${adminButtons}
-            </div>
-        </div>
-    </div>`;
+    return `<div class="card list-card"><div class="list-card-body"><div class="list-card-left"><p class="list-card-name" onclick="viewDetails('${m.id}')">${m.brand}</p><img src="${thumbSrc}" class="list-card-img" onclick="viewDetails('${m.id}')" onerror="this.src='${PLACEHOLDER_IMG}'"></div><div class="list-card-actions"><button class="btn-details" onclick="viewDetails('${m.id}')">View Details</button>${isInCart ? `<button class="btn-cart-small" style="background:#dc3545;" onclick="removeFromCart('${m.id}')">Remove</button>` : `<button class="btn-cart-small" onclick="openQtyPopup('${m.id}')">Add to Cart</button>`}${adminButtons}</div></div></div>`;
 }
 
 function createCardHTML(m, type) {
@@ -139,25 +124,17 @@ function renderMedicines(list) {
         document.getElementById("collectionTitle").innerText = "Ethical Medicines";
         container.className = "medicine-list-view";
         let filtered = list.filter(m => m.isEthical === true);
-        if(filtered.length === 0) {
-            container.innerHTML = buildEmptyStateHTML("", "No Ethical medicines added yet");
-            return;
-        }
+        if(filtered.length === 0) { container.innerHTML = buildEmptyStateHTML("", "No Ethical medicines added yet"); return; }
         filtered.forEach(m => { container.innerHTML += createListCardHTML(m); });
     } else {
         document.getElementById("collectionTitle").innerText = "Medicine Collection";
         container.className = "medicine-grid";
         let recentList = list.filter(m => m.isRecent === true);
         let collectionList = list.filter(m => m.isCollection === true || (m.isEthical !== true && m.isRecent !== true));
-        if(recentList.length > 0) {
-            recentSection.style.display = "block";
-            recentList.forEach(m => { recentContainer.innerHTML += createCardHTML(m, 'recent'); });
-        } else { recentSection.style.display = "none"; }
-        if(collectionList.length === 0 && recentList.length === 0) {
-            container.innerHTML = buildEmptyStateHTML("", "No medicines yet — ask admin to add some");
-        } else {
-            collectionList.forEach(m => { container.innerHTML += createCardHTML(m, 'collection'); });
-        }
+        if(recentList.length > 0) { recentSection.style.display = "block"; recentList.forEach(m => { recentContainer.innerHTML += createCardHTML(m, 'recent'); }); }
+        else { recentSection.style.display = "none"; }
+        if(collectionList.length === 0 && recentList.length === 0) { container.innerHTML = buildEmptyStateHTML("", "No medicines yet — ask admin to add some"); }
+        else { collectionList.forEach(m => { container.innerHTML += createCardHTML(m, 'collection'); }); }
     }
 }
 
@@ -168,24 +145,7 @@ function viewDetails(id) {
     let images = (m.images && m.images.length > 0) ? m.images : [m.image || PLACEHOLDER_IMG];
     let slidesHTML = images.map(img => `<div class="gallery-slide"><img src="${img}" class="detail-img" onerror="this.src='${PLACEHOLDER_IMG}'"></div>`).join('');
     let dotsHTML = images.length > 1 ? `<div class="gallery-dots" id="galleryDots">${images.map((_, i) => `<span class="gallery-dot ${i===0?'active':''}" onclick="goToSlide(${i})"></span>`).join('')}</div>` : '';
-    document.getElementById("detailContent").innerHTML = `
-        <div class="gallery-container"><div class="gallery-track" id="galleryTrack">${slidesHTML}</div></div>
-        ${dotsHTML}
-        <div class="detail-info-card">
-            <div class="detail-name-box"><h1>${m.brand}</h1></div>
-            <div class="info-row"><b>Salt</b><span>${m.salt || 'N/A'}</span></div>
-            <div class="info-row"><b>Company</b><span>${m.company || 'N/A'}</span></div>
-            <div class="info-row"><b>Composition</b><span>${m.mg || 'N/A'}</span></div>
-            <div class="info-row"><b>Packing</b><span>${m.packing || 'N/A'}</span></div>
-            <div class="info-row mrp-row"><b>MRP Price</b><span>₹${m.mrp || '0'}</span></div>
-            <div class="info-row"><b>Expiry</b><span>${m.expiry || 'N/A'}</span></div>
-        </div>
-        <div class="detail-btn-area">
-            ${isInCart
-                ? `<button class="confirm-btn-premium" style="background:#dc3545;" onclick="removeFromCart('${m.id}', true)">✖ Remove Item</button>`
-                : `<button class="confirm-btn-premium" onclick="openQtyPopup('${m.id}', true)">🛒 Add to Cart Now</button>`
-            }
-        </div>`;
+    document.getElementById("detailContent").innerHTML = `<div class="gallery-container"><div class="gallery-track" id="galleryTrack">${slidesHTML}</div></div>${dotsHTML}<div class="detail-info-card"><div class="detail-name-box"><h1>${m.brand}</h1></div><div class="info-row"><b>Salt</b><span>${m.salt || 'N/A'}</span></div><div class="info-row"><b>Company</b><span>${m.company || 'N/A'}</span></div><div class="info-row"><b>Composition</b><span>${m.mg || 'N/A'}</span></div><div class="info-row"><b>Packing</b><span>${m.packing || 'N/A'}</span></div><div class="info-row mrp-row"><b>MRP Price</b><span>₹${m.mrp || '0'}</span></div><div class="info-row"><b>Expiry</b><span>${m.expiry || 'N/A'}</span></div></div><div class="detail-btn-area">${isInCart ? `<button class="confirm-btn-premium" style="background:#dc3545;" onclick="removeFromCart('${m.id}', true)">✖ Remove Item</button>` : `<button class="confirm-btn-premium" onclick="openQtyPopup('${m.id}', true)">🛒 Add to Cart Now</button>`}</div>`;
     document.getElementById("mainView").style.display = "none";
     document.getElementById("bottomCartBar").style.display = "none";
     document.getElementById("detailView").style.display = "flex";
@@ -203,16 +163,9 @@ function hideDetails() {
     setTimeout(() => { window.scrollTo(0, lastScrollPos); }, 50);
 }
 
-function goToSlide(index) {
-    let track = document.getElementById("galleryTrack"); if (!track) return;
-    track.scrollTo({ left: track.offsetWidth * index, behavior: 'smooth' });
-    updateGalleryDots(index);
-}
+function goToSlide(index) { let track = document.getElementById("galleryTrack"); if (!track) return; track.scrollTo({ left: track.offsetWidth * index, behavior: 'smooth' }); updateGalleryDots(index); }
 function updateGalleryDots(activeIndex) { document.querySelectorAll(".gallery-dot").forEach((d, i) => d.classList.toggle("active", i === activeIndex)); }
-function initGalleryScroll() {
-    let track = document.getElementById("galleryTrack"); if (!track) return;
-    track.addEventListener("scroll", () => { updateGalleryDots(Math.round(track.scrollLeft / track.offsetWidth)); });
-}
+function initGalleryScroll() { let track = document.getElementById("galleryTrack"); if (!track) return; track.addEventListener("scroll", () => { updateGalleryDots(Math.round(track.scrollLeft / track.offsetWidth)); }); }
 
 function removeFromCart(id, refreshDetail = false) {
     let savedScroll = window.pageYOffset || document.documentElement.scrollTop;
@@ -224,6 +177,7 @@ function removeFromCart(id, refreshDetail = false) {
 }
 
 function changeQty(id, val) { let input = document.getElementById(id); let newVal = (parseInt(input.value) || 0) + val; if (newVal >= 0) input.value = newVal; }
+
 function openQtyPopup(id, refreshDetail = false) {
     if(!refreshDetail) lastScrollPos = window.pageYOffset || document.documentElement.scrollTop;
     let m = medicineData.find(x => x.id === id);
@@ -293,7 +247,31 @@ function searchMedicine() {
     }
 }
 
-function adminLogin() { if(prompt("Password") === ADMIN_PASSWORD) { isAdmin = true; document.getElementById("adminPanel").style.display = "block"; renderMedicines(medicineData); } }
+function adminLogin() {
+    document.getElementById("adminPasswordInput").value = "";
+    document.getElementById("adminLoginModal").style.display = "flex";
+    setTimeout(() => document.getElementById("adminPasswordInput").focus(), 100);
+}
+function submitAdminLogin() {
+    let pwd = document.getElementById("adminPasswordInput").value;
+    if(pwd === ADMIN_PASSWORD) {
+        isAdmin = true;
+        document.getElementById("adminPanel").style.display = "block";
+        document.getElementById("adminLoginModal").style.display = "none";
+        renderMedicines(medicineData);
+    } else {
+        document.getElementById("adminPasswordInput").value = "";
+        document.getElementById("adminPasswordInput").placeholder = "❌ Wrong Password, try again";
+        document.getElementById("adminPasswordInput").style.borderColor = "#dc3545";
+        setTimeout(() => {
+            document.getElementById("adminPasswordInput").placeholder = "Enter Password";
+            document.getElementById("adminPasswordInput").style.borderColor = "#e2e8f0";
+        }, 2000);
+    }
+}
+function closeAdminLogin() {
+    document.getElementById("adminLoginModal").style.display = "none";
+}
 
 function updateCategoryUI() {
     let dropdown = document.getElementById("medCategory");
@@ -325,7 +303,7 @@ async function saveMedicine() {
         category: document.getElementById("medCategory").value,
         isRecent: document.getElementById("isRecent").checked,
         isEthical: document.getElementById("isEthical").checked,
-                isCollection: document.getElementById("isCollection").checked,
+        isCollection: document.getElementById("isCollection").checked,
         createdAt: new Date()
     };
     if(finalImages.length > 0) { med.images = finalImages; med.image = finalImages[0]; }
